@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  users-service:
+    build:
+      context: ./usersService
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=users-service
+      - APP_KEY=base64:EdZ7Jjpp9kP/pABHVRyoUopV9T4NS2Q0N8N+D+Sl+Y4=
+      - DB_CONNECTION=mysql
+      - DB_HOST=db-users-service
+      - DB_PORT=3306
+      - DB_DATABASE=db_users_service
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:Ce3ZgdFi9581ZXVqerauP6RDeCxbu82oF8U5AVS+QUM=
+      - REDIS_CLIENT=predis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+    depends_on:
+      - db-users-service
+      - redis
+    volumes:
+      - ./usersService:/app
+
+  notifications-service:
+    build:
+      context: ./notificationsService
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - APP_NAME=notifications-service
+      - APP_KEY=base64:EdZ7Jjpp9kP/rttuinbbnmyt09jnkl+D+Sl+Y4=
+      - DB_CONNECTION=mysql
+      - DB_HOST=db-notifications-service
+      - DB_PORT=3306
+      - DB_DATABASE=db_notifications_service
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:OcgLwYCdB2k4hnMhTTOmTsyhp0yXmtsNwzlA/Eb9B1k=
+      - REDIS_CLIENT=predis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+    depends_on:
+      - db-notifications-service
+      - redis
+    volumes:
+      - ./notificationsService:/app
+
+  db-users-service:
+    image: mysql:latest
+    ports:
+      - "33001:3306"
+    environment:
+      MYSQL_DATABASE: db_users_service
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - ./mysql-users-service:/var/lib/mysql
+
+  db-notifications-service:
+    image: mysql:latest
+    ports:
+      - "33002:3306"
+    environment:
+      MYSQL_DATABASE: db_notifications_service
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - ./mysql-notifications-service:/var/lib/mysql
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    command: [ "redis-server", "--timeout", "0" ]
+
+volumes:
+  mysql-users-service:
+  mysql-notifications-service:
